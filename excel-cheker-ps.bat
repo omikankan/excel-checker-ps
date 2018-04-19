@@ -1,0 +1,1 @@
+powershell -ExecutionPolicy RemoteSigned -File .\excel-chekcker.ps1 %1
