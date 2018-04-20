@@ -22,7 +22,7 @@ class ExcelFile{
 
   close(){
     $this.app.DisplayAlerts = $false
-    $this.book.close
+    $this.book.close()
     $this.app.DisplayAlerts = $true
     $this.app.quit()
   }
