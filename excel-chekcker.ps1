@@ -35,7 +35,7 @@ class ExcelFile{
         $styleNames.Add($style.Name)
       }      
     }
-      return $styleNames
+    return $styleNames
   }
 
 [System.Collections.Generic.List[string]] getNames(){
