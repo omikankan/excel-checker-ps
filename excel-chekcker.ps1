@@ -2,7 +2,7 @@ param([string]$path)
 
 class ExcelFile{
   [string]$fullPath
-  [System.Object]$app 
+  [System.Object]$app
   [System.Object]$book
 
   ExcelFile([string] $inputPath){
@@ -25,6 +25,9 @@ class ExcelFile{
     $this.book.close()
     $this.app.DisplayAlerts = $true
     $this.app.quit()
+
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($this.app)
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($this.book)
   }
 
   [System.Collections.Generic.List[string]] getStyles(){
@@ -33,27 +36,27 @@ class ExcelFile{
 
       if(-not $style.BuiltIn){
         $styleNames.Add($style.Name)
-      }      
+      }
     }
     return $styleNames
   }
 
-[System.Collections.Generic.List[string]] getNames(){
-  $visibleNames = New-Object 'System.Collections.Generic.List[string]'
-  $visibleNames.Add("-- Visible names")
-  $unvisibleNames = New-Object 'System.Collections.Generic.List[string]'
-  $unvisibleNames.Add("-- Unvisible names")
-  foreach($name in $this.book.Names){
+  [System.Collections.Generic.List[string]] getNames(){
+    $visibleNames = New-Object 'System.Collections.Generic.List[string]'
+    $visibleNames.Add("-- Visible names")
+    $unvisibleNames = New-Object 'System.Collections.Generic.List[string]'
+    $unvisibleNames.Add("-- Unvisible names")
+    foreach($name in $this.book.Names){
+      if($name.visible){
+        $visibleNames.Add($name.Name + " ... refersto: " + $name.refersto)
+      }else{
+        $unvisibleNames.Add($name.Name + " ... refersto: " + $name.refersto)
+      }
 
-    if($name.visible){
-      $visibleNames.Add($name.Name + " ... refersto: " + $name.refersto)
-    }else{
-      $unvisibleNames.Add($name.Name + " ... refersto: " + $name.refersto)
     }
 
+    return $visibleNames + $unvisibleNames
   }
-  return $visibleNames + $unvisibleNames
-}
 
   [System.Collections.Generic.List[string]] getHeaderFooter(){
     $headerFooter = New-Object 'System.Collections.Generic.List[string]'
@@ -64,6 +67,7 @@ class ExcelFile{
         $headerFooter.Add("Footer left= " + $page.LeftFooter + "`r`n" + "Footer center= " + $page.CenterFooter + "`r`n" + "Footer right=" + $page.RightFooter)
       }
     }
+
     return $headerFooter
   }
 }
@@ -75,7 +79,7 @@ if($path -eq ""){
   $file.open()
 
   Write-Host -foreground Yellow ("`r`n******** file : " + $path)
-  
+
   Write-Host -foreground Cyan "`r`n------- Styles"
   foreach($outputStyle in $file.getStyles()){
       Write-Host -foreground Cyan $outputStyle
@@ -89,5 +93,9 @@ if($path -eq ""){
       Write-Host -foreground Green $outputValue
   }
   $file.close()
-  Write-Host -foreground Yellow "`r`n******** END"
+
+  $file = $null
+  $path = $null
+
+  
 }
